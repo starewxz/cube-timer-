@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Rubik's Cube Timer</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <style>
+            body {
+                background-color: black;
+            }
+
+            .result-container {
+                color: white;
+                text-align: center;
+                margin-top: 300px;
+                font-family: "JetBrains Mono", monospace;
+                font-size: 30px;
+            }
+
+            .stopwatch {
+                color: white;
+                text-align: center;
+                margin-top: 20px;
+                font-family: "JetBrains Mono", monospace;
+                font-size: 40px;
+            }
+
+            .averages {
+                position: fixed;
+                bottom: 10px;
+                left: 10px;
+                color: white;
+                font-family: "JetBrains Mono", monospace;
+                font-size: 15px;
+            }
+        </style>
+
+        <!-- Previous result and time difference display -->
+        <div id="resultContainer" class="result-container">
+            <div id="previousResult"></div>
+            <div id="lastResult"></div>
+        </div>
+
+        <!-- Stopwatch display -->
+        <div id="stopwatch" class="stopwatch">00:00:00</div>
+
+        <!-- Averages display -->
+        <div id="averages" class="averages">
+            Avg 5: --:--:-- | Avg 12: --:--:--
+        </div>
+
+        <script>
+            let isRunning = false;
+            let timerInterval;
+            let elapsedTime = 0;
+            let isHoldingSpace = false;
+            let readyToStart = false;
+            let holdStartTime = 0;
+
+            // Results storage
+            const results = [];
+
+            // Format time to display it as mm:ss:ms
+            function formatTime(ms) {
+                const minutes = String(Math.floor((ms / 60000) % 60)).padStart(2, '0');
+                const seconds = String(Math.floor((ms / 1000) % 60)).padStart(2, '0');
+                const milliseconds = String(Math.floor((ms / 10) % 100)).padStart(2, '0');
+                return `${minutes}:${seconds}:${milliseconds}`;
+            }
+
+            // Update the stopwatch display
+            function updateDisplay() {
+                document.getElementById('stopwatch').textContent = formatTime(elapsedTime);
+            }
+
+            // Calculate average of last 'count' results
+            function calculateAverage(count) {
+                if (results.length < count) return null;
+                const sum = results.slice(-count).reduce((acc, curr) => acc + curr, 0);
+                return sum / count;
+            }
+
+            // Update average display
+            function updateAverages() {
+                const avg5 = calculateAverage(5);
+                const avg12 = calculateAverage(12);
+                document.getElementById('averages').textContent = `Avg 5: ${avg5 ? formatTime(avg5) : '--:--:--'} | Avg 12: ${avg12 ? formatTime(avg12) : '--:--:--'}`;
+                localStorage.setItem('avg5', avg5);
+                localStorage.setItem('avg12', avg12);
+            }
+
+            // Start the timer
+            function startTimer() {
+                const startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    updateDisplay();
+                }, 10);
+            }
+
+            // Stop the timer
+            function stopTimer() {
+                clearInterval(timerInterval);
+            }
+
+            // Reset the timer
+            function resetTimer() {
+                elapsedTime = 0;
+                updateDisplay();
+            }
+
+            // Save the current result and calculate time difference with the previous result
+            function saveLastResult() {
+                const lastResult = elapsedTime;
+                const previousResult = localStorage.getItem('previousResult') ? parseInt(localStorage.getItem('previousResult')) : null;
+
+                if (previousResult !== null) {
+                    const timeDifference = lastResult - previousResult;
+                    const differenceText = `Difference: ${formatTime(Math.abs(timeDifference))} ${timeDifference > 0 ? '+' : timeDifference < 0 ? '-' : ''}`;
+                    document.getElementById('lastResult').textContent = `Last Result: ${formatTime(lastResult)} | ${differenceText}`;
+                } else {
+                    document.getElementById('lastResult').textContent = `Last Result: ${formatTime(lastResult)}`;
+                }
+
+                document.getElementById('previousResult').textContent = `Previous Result: ${previousResult ? formatTime(previousResult) : 'None'}`;
+                localStorage.setItem('previousResult', lastResult);
+
+                // Add the result to the array and update averages
+                results.push(lastResult);
+                if (results.length > 12) results.shift(); // Keep only the last 12 results
+                updateAverages();
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && !isHoldingSpace) {
+                    isHoldingSpace = true;
+                    holdStartTime = Date.now();
+                    document.getElementById('stopwatch').style.color = 'red';
+
+                    setTimeout(() => {
+                        if (isHoldingSpace) {
+                            document.getElementById('stopwatch').style.color = 'green';
+                            readyToStart = true;
+                        }
+                    }, 500); // Change to green after 0.5 seconds if still holding
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                if (e.code === 'Space') {
+                    if (isHoldingSpace) {
+                        isHoldingSpace = false;
+
+                        if (readyToStart) {
+                            if (!isRunning) {
+                                // If the timer was stopped, reset it before starting a new round
+                                resetTimer();
+                                document.getElementById('stopwatch').style.color = 'white';
+                                startTimer();
+                                isRunning = true;
+                            } else {
+                                // Stop the timer if it's already running
+                                stopTimer();
+                                isRunning = false;
+                                saveLastResult(); // Save the result and calculate the difference
+                            }
+                        } else if (isRunning) {
+                            // Stop the timer if running
+                            stopTimer();
+                            isRunning = false;
+                            saveLastResult(); // Save the result and calculate the difference
+                        }
+
+                        // Reset the state
+                        readyToStart = false;
+                    }
+                }
+            });
+
+            // Display the previous result and last result on page load
+            const previousResult = localStorage.getItem('previousResult');
+            if (previousResult) {
+                document.getElementById('previousResult').textContent = `Previous Result: ${formatTime(parseInt(previousResult))}`;
+            }
+
+            // Display saved averages on page load
+            const savedAvg5 = localStorage.getItem('avg5');
+            const savedAvg12 = localStorage.getItem('avg12');
+            if (savedAvg5 && savedAvg12) {
+                document.getElementById('averages').textContent = `Avg 5: ${formatTime(parseFloat(savedAvg5))} | Avg 12: ${formatTime(parseFloat(savedAvg12))}`;
+            }
+
+        </script>
+    </body>
+</html>
