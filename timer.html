@@ -10,6 +10,9 @@
         <style>
             body {
                 background-color: black;
+                margin: 0;
+                padding: 0;
+                touch-action: manipulation; /* Improve touch responsiveness */
             }
 
             .result-container {
@@ -134,6 +137,33 @@
                 updateAverages();
             }
 
+            // Handle spacebar or touch interactions
+            function handleInteraction() {
+                if (readyToStart) {
+                    if (!isRunning) {
+                        // If the timer was stopped, reset it before starting a new round
+                        resetTimer();
+                        document.getElementById('stopwatch').style.color = 'white';
+                        startTimer();
+                        isRunning = true;
+                    } else {
+                        // Stop the timer if it's already running
+                        stopTimer();
+                        isRunning = false;
+                        saveLastResult(); // Save the result and calculate the difference
+                    }
+                } else if (isRunning) {
+                    // Stop the timer if running
+                    stopTimer();
+                    isRunning = false;
+                    saveLastResult(); // Save the result and calculate the difference
+                }
+
+                // Reset the state
+                readyToStart = false;
+            }
+
+            // Handle keydown and keyup events for desktop
             document.addEventListener('keydown', (e) => {
                 if (e.code === 'Space' && !isHoldingSpace) {
                     isHoldingSpace = true;
@@ -153,30 +183,33 @@
                 if (e.code === 'Space') {
                     if (isHoldingSpace) {
                         isHoldingSpace = false;
-
-                        if (readyToStart) {
-                            if (!isRunning) {
-                                // If the timer was stopped, reset it before starting a new round
-                                resetTimer();
-                                document.getElementById('stopwatch').style.color = 'white';
-                                startTimer();
-                                isRunning = true;
-                            } else {
-                                // Stop the timer if it's already running
-                                stopTimer();
-                                isRunning = false;
-                                saveLastResult(); // Save the result and calculate the difference
-                            }
-                        } else if (isRunning) {
-                            // Stop the timer if running
-                            stopTimer();
-                            isRunning = false;
-                            saveLastResult(); // Save the result and calculate the difference
-                        }
-
-                        // Reset the state
-                        readyToStart = false;
+                        handleInteraction();
                     }
+                }
+            });
+
+            // Handle touch events for mobile
+            document.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevent default touch actions
+                if (!isHoldingSpace) {
+                    isHoldingSpace = true;
+                    holdStartTime = Date.now();
+                    document.getElementById('stopwatch').style.color = 'red';
+
+                    setTimeout(() => {
+                        if (isHoldingSpace) {
+                            document.getElementById('stopwatch').style.color = 'green';
+                            readyToStart = true;
+                        }
+                    }, 500); // Change to green after 0.5 seconds if still holding
+                }
+            });
+
+            document.addEventListener('touchend', (e) => {
+                e.preventDefault(); // Prevent default touch actions
+                if (isHoldingSpace) {
+                    isHoldingSpace = false;
+                    handleInteraction();
                 }
             });
 
@@ -192,7 +225,6 @@
             if (savedAvg5 && savedAvg12) {
                 document.getElementById('averages').textContent = `Avg 5: ${formatTime(parseFloat(savedAvg5))} | Avg 12: ${formatTime(parseFloat(savedAvg12))}`;
             }
-
         </script>
     </body>
 </html>
