@@ -87,6 +87,10 @@
                 allTime: localStorage.getItem('bestAllTime') ? parseInt(localStorage.getItem('bestAllTime')) : Infinity
             };
 
+            // Load averages from localStorage
+            let avg5 = localStorage.getItem('avg5') ? parseFloat(localStorage.getItem('avg5')) : null;
+            let avg12 = localStorage.getItem('avg12') ? parseFloat(localStorage.getItem('avg12')) : null;
+
             // Format time to display it as mm:ss:ms
             function formatTime(ms) {
                 const minutes = String(Math.floor((ms / 60000) % 60)).padStart(2, '0');
@@ -109,8 +113,8 @@
 
             // Update average and best results display
             function updateResults() {
-                const avg5 = calculateAverage(5);
-                const avg12 = calculateAverage(12);
+                avg5 = calculateAverage(5);
+                avg12 = calculateAverage(12);
 
                 // Calculate best results
                 const best5 = Math.min(...results.slice(-5), bestResults[5]);
@@ -130,6 +134,10 @@
                     localStorage.setItem('bestAllTime', bestAllTime);
                     bestResults.allTime = bestAllTime;
                 }
+
+                // Save averages to local storage
+                if (avg5 !== null) localStorage.setItem('avg5', avg5);
+                if (avg12 !== null) localStorage.setItem('avg12', avg12);
 
                 document.getElementById('averages').textContent = 
                     `Avg 5: ${avg5 ? formatTime(avg5) : '--:--:--'} | Best 5: ${formatTime(bestResults[5])} | ` +
@@ -225,17 +233,14 @@
             });
 
             document.addEventListener('keyup', (e) => {
-                if (e.code === 'Space') {
-                    if (isHoldingSpace) {
-                        isHoldingSpace = false;
-                        handleInteraction();
-                    }
+                if (e.code === 'Space' && isHoldingSpace) {
+                    isHoldingSpace = false;
+                    handleInteraction();
                 }
             });
 
-            // Handle touch events for mobile
+            // Handle touch interactions for mobile
             document.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // Prevent default touch actions
                 if (!isHoldingSpace) {
                     isHoldingSpace = true;
                     holdStartTime = Date.now();
@@ -257,8 +262,16 @@
                 }
             });
 
-            // Initialize the count display
-            document.getElementById('resultCount').textContent = `Results: ${results.length}`;
+            // Initialize displays with stored values
+            if (results.length > 0) {
+                updateResults();
+                document.getElementById('resultCount').textContent = `Results: ${results.length}`;
+            }
+
+            const previousResult = localStorage.getItem('previousResult');
+            if (previousResult) {
+                document.getElementById('previousResult').textContent = `Previous Result: ${formatTime(parseInt(previousResult))}`;
+            }
         </script>
     </body>
 </html>
