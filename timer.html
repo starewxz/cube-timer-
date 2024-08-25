@@ -12,7 +12,7 @@
                 background-color: black;
                 margin: 0;
                 padding: 0;
-                touch-action: manipulation; /* Improve touch responsiveness */
+                touch-action: manipulation;
             }
 
             .result-container {
@@ -40,10 +40,12 @@
                 font-size: 15px;
             }
 
-            .press-space{
-                margin-top: 27px;
+            .result-count {
+                position: fixed;
+                top: 10px;
+                right: 10px;
                 color: white;
-                text-align: center;
+                font-family: "JetBrains Mono", monospace;
                 font-size: 20px;
             }
         </style>
@@ -57,13 +59,15 @@
         <!-- Stopwatch display -->
         <div id="stopwatch" class="stopwatch">00:00:00</div>
 
-        <!-- Averages display -->
+        <!-- Averages and best result display -->
         <div id="averages" class="averages">
-            Avg 5: --:--:-- | Avg 12: --:--:--
+            Avg 5: --:--:-- | Best 5: --:--:-- | Avg 12: --:--:-- | Best 12: --:--:-- | Best All Time: --:--:--
         </div>
-        <!--press space-->
-        <div class="press-space">Press spacebar to Start</div>
-        
+
+        <!-- Total count of all results -->
+        <div id="resultCount" class="result-count">
+            Results: 0
+        </div>
 
         <script>
             let isRunning = false;
@@ -74,7 +78,7 @@
             let holdStartTime = 0;
 
             // Results storage
-            const results = [];
+            const results = JSON.parse(localStorage.getItem('results')) || [];
 
             // Best results storage
             const bestResults = {
@@ -133,7 +137,6 @@
                     `Best All Time: ${formatTime(bestResults.allTime)}`;
             }
 
-
             // Start the timer
             function startTimer() {
                 const startTime = Date.now() - elapsedTime;
@@ -172,8 +175,11 @@
 
                 // Add the result to the array and update averages and best results
                 results.push(lastResult);
-                if (results.length > 12) results.shift(); // Keep only the last 12 results
+                localStorage.setItem('results', JSON.stringify(results));
                 updateResults();
+
+                // Update the total count display
+                document.getElementById('resultCount').textContent = `Results: ${results.length}`;
             }
 
             // Handle spacebar or touch interactions
@@ -245,25 +251,14 @@
             });
 
             document.addEventListener('touchend', (e) => {
-                e.preventDefault(); // Prevent default touch actions
                 if (isHoldingSpace) {
                     isHoldingSpace = false;
                     handleInteraction();
                 }
             });
 
-            // Display the previous result and last result on page load
-            const previousResult = localStorage.getItem('previousResult');
-            if (previousResult) {
-                document.getElementById('previousResult').textContent = `Previous Result: ${formatTime(parseInt(previousResult))}`;
-            }
-
-            // Display saved averages on page load
-            const savedAvg5 = localStorage.getItem('avg5');
-            const savedAvg12 = localStorage.getItem('avg12');
-            if (savedAvg5 && savedAvg12) {
-                document.getElementById('averages').textContent = `Avg 5: ${formatTime(parseFloat(savedAvg5))} | Avg 12: ${formatTime(parseFloat(savedAvg12))}`;
-            }
+            // Initialize the count display
+            document.getElementById('resultCount').textContent = `Results: ${results.length}`;
         </script>
     </body>
 </html>
