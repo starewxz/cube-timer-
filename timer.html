@@ -48,6 +48,16 @@
                 font-family: "JetBrains Mono", monospace;
                 font-size: 20px;
             }
+
+            /* Button for clearing results */
+            .clear-button {
+                position: fixed;
+                bottom: 10px;
+                left: 250px;
+                font-family: "JetBrains Mono", monospace;
+                font-size: 15px;
+                cursor: pointer;
+            }
         </style>
 
         <!-- Previous result and time difference display -->
@@ -64,6 +74,9 @@
             Avg 5: --:--:-- | Best 5: --:--:-- | Avg 12: --:--:-- | Best 12: --:--:-- | Best All Time: --:--:--
         </div>
 
+        <!-- Button to clear saved results -->
+        <button id="clearResults" class="clear-button">Cast Results</button>
+
         <!-- Total count of all results -->
         <div id="resultCount" class="result-count">
             Results: 0
@@ -78,10 +91,10 @@
             let holdStartTime = 0;
 
             // Results storage
-            const results = JSON.parse(localStorage.getItem('results')) || [];
+            let results = JSON.parse(localStorage.getItem('results')) || [];
 
             // Best results storage
-            const bestResults = {
+            let bestResults = {
                 5: localStorage.getItem('best5') ? parseInt(localStorage.getItem('best5')) : Infinity,
                 12: localStorage.getItem('best12') ? parseInt(localStorage.getItem('best12')) : Infinity,
                 allTime: localStorage.getItem('bestAllTime') ? parseInt(localStorage.getItem('bestAllTime')) : Infinity
@@ -200,35 +213,31 @@
                         startTimer();
                         isRunning = true;
                     } else {
-                        // Stop the timer if it's already running
                         stopTimer();
+                        saveLastResult();
+                        resetTimer();
                         isRunning = false;
-                        saveLastResult(); // Save the result and calculate the difference
+                        document.getElementById('stopwatch').style.color = 'white';
                     }
-                } else if (isRunning) {
-                    // Stop the timer if running
-                    stopTimer();
-                    isRunning = false;
-                    saveLastResult(); // Save the result and calculate the difference
+                    readyToStart = false;
                 }
-
-                // Reset the state
-                readyToStart = false;
             }
 
-            // Handle keydown and keyup events for desktop
+            // Event listeners for keyboard and touch interactions
             document.addEventListener('keydown', (e) => {
-                if (e.code === 'Space' && !isHoldingSpace) {
-                    isHoldingSpace = true;
-                    holdStartTime = Date.now();
-                    document.getElementById('stopwatch').style.color = 'red';
+                if (e.code === 'Space') {
+                    if (!isHoldingSpace) {
+                        isHoldingSpace = true;
+                        holdStartTime = Date.now();
+                        document.getElementById('stopwatch').style.color = 'red';
 
-                    setTimeout(() => {
-                        if (isHoldingSpace) {
-                            document.getElementById('stopwatch').style.color = 'green';
-                            readyToStart = true;
-                        }
-                    }, 500); // Change to green after 0.5 seconds if still holding
+                        setTimeout(() => {
+                            if (isHoldingSpace) {
+                                document.getElementById('stopwatch').style.color = 'green';
+                                readyToStart = true;
+                            }
+                        }, 500); // Change to green after 0.5 seconds if still holding
+                    }
                 }
             });
 
@@ -272,6 +281,32 @@
             if (previousResult) {
                 document.getElementById('previousResult').textContent = `Previous Result: ${formatTime(parseInt(previousResult))}`;
             }
+
+            // Clear results button functionality
+            document.getElementById('clearResults').addEventListener('click', () => {
+                localStorage.removeItem('results');
+                localStorage.removeItem('best5');
+                localStorage.removeItem('best12');
+                localStorage.removeItem('bestAllTime');
+                localStorage.removeItem('avg5');
+                localStorage.removeItem('avg12');
+                localStorage.removeItem('previousResult');
+
+                // Reset all variables and UI
+                results = [];
+                bestResults = {
+                    5: Infinity,
+                    12: Infinity,
+                    allTime: Infinity
+                };
+                avg5 = null;
+                avg12 = null;
+                document.getElementById('averages').textContent = 
+                    `Avg 5: --:--:-- | Best 5: --:--:-- | Avg 12: --:--:-- | Best 12: --:--:-- | Best All Time: --:--:--`;
+                document.getElementById('resultCount').textContent = `Results: 0`;
+                document.getElementById('previousResult').textContent = `Previous Result: None`;
+                document.getElementById('lastResult').textContent = `Last Result: None`;
+            });
         </script>
     </body>
 </html>
