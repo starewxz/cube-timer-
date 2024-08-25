@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Results</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: "JetBrains Mono", monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .results-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .result-item {
+            font-size: 20px;
+            padding: 5px;
+            background-color: #333;
+            border-radius: 4px;
+        }
+
+        .all-results{
+            font-family: "JetBrains Mono", monospace;
+            font-size: 30px;
+            appearance: none;
+            background-color: transparent;
+            border: 2px solid #1A1A1A;
+            border-radius: 15px;
+            box-sizing: border-box;
+            color: #3B3B3B;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            line-height: normal;
+            margin: 0;
+            min-height: 60px;
+            min-width: 0;
+            outline: none;
+            padding: 16px 24px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            width: 150px;
+            will-change: transform;
+            background-color: #fff;
+            }
+
+            .all-results:disabled {
+            pointer-events: none;
+            }
+
+            .all-results:hover {
+            color: #fff;
+            background-color: #1A1A1A;
+            box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+            transform: translateY(-2px);
+            }
+
+            .all-results:active {
+            box-shadow: none;
+            transform: translateY(0);
+            }
+    </style>
+</head>
+<body>
+    <a href="timer.html" class="all-results">Timer</a>
+    <div class="results-container" id="resultsContainer">
+        <!-- Results will be loaded here -->
+    </div>
+
+    <script>
+        // Retrieve and display results
+        const results = JSON.parse(localStorage.getItem('results')) || [];
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        results.forEach(result => {
+            const resultItem = document.createElement('div');
+            resultItem.classList.add('result-item');
+            resultItem.textContent = (result / 1000).toFixed(2); // Convert ms to seconds
+            resultsContainer.appendChild(resultItem);
+        });
+    </script>
+</body>
+</html>

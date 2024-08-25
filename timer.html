@@ -52,11 +52,88 @@
         /* Button for clearing results */
         .clear-button {
             position: fixed;
-            bottom: 10px;
-            left: 250px;
-            font-family: "JetBrains Mono", monospace;
-            font-size: 15px;
+            bottom: 50px;
+            left: 10px;
             cursor: pointer;
+            align-self: center;
+            background-color: #fff;
+            background-image: none;
+            background-position: 0 90%;
+            background-repeat: repeat no-repeat;
+            background-size: 4px 3px;
+            border-radius: 15px 225px 255px 15px 15px 255px 225px 15px;
+            border-style: solid;
+            border-width: 2px;
+            box-shadow: rgba(0, 0, 0, .2) 15px 28px 25px -18px;
+            box-sizing: border-box;
+            color: #41403e;
+            cursor: pointer;
+            display: inline-block;
+            font-family: Neucha, sans-serif;
+            font-size: 1rem;
+            line-height: 23px;
+            outline: none;
+            padding: .75rem;
+            text-decoration: none;
+            transition: all 235ms ease-in-out;
+            border-bottom-left-radius: 15px 255px;
+            border-bottom-right-radius: 225px 15px;
+            border-top-left-radius: 255px 15px;
+            border-top-right-radius: 15px 225px;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .clear-button:hover {
+            box-shadow: rgba(0, 0, 0, .3) 2px 8px 8px -5px;
+            transform: translate3d(0, 2px, 0);
+        }
+
+        .clear-button:focus {
+            box-shadow: rgba(0, 0, 0, .3) 2px 8px 4px -6px;
+        }
+
+        .result-link{
+            --b: 3px;   /* border thickness */
+            --s: .45em; /* size of the corner */
+            --color: #fff;
+            
+            padding: calc(.5em + var(--s)) calc(.9em + var(--s));
+            color: var(--color);
+            --_p: var(--s);
+            background:
+                conic-gradient(from 90deg at var(--b) var(--b),#0000 90deg,var(--color) 0)
+                var(--_p) var(--_p)/calc(100% - var(--b) - 2*var(--_p)) calc(100% - var(--b) - 2*var(--_p));
+            transition: .3s linear, color 0s, background-color 0s;
+            outline: var(--b) solid #0000;
+            outline-offset: .6em;
+            font-size: 16px;
+
+            border: 0;
+
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            /* Position the element at the top-right corner */
+            position: fixed;
+            top: 0px; /* Distance from the top */
+            right: 120px; /* Distance from the right */
+            text-decoration: none;
+        }
+
+        
+
+        .result-link:hover,
+        .result-link:focus-visible{
+            --_p: 0px;
+            outline-color: var(--color);
+            outline-offset: .05em;
+        }
+
+        .result-link:active {
+            background: var(--color);
+            color: #fff;
         }
     </style>
 
@@ -65,6 +142,8 @@
         <div id="previousResult"></div>
         <div id="lastResult"></div>
     </div>
+
+    <a href="results.html" id="viewResultsLink" class="result-link">View Results</a>
 
     <!-- Stopwatch display -->
     <div id="stopwatch" class="stopwatch">00:00:00</div>
@@ -79,7 +158,7 @@
 
     <!-- Total count of all results -->
     <div id="resultCount" class="result-count">
-        Results: 0
+        Count: 0
     </div>
 
     <script>
@@ -90,6 +169,7 @@
         let readyToStart = false;
         let holdStartTime = 0;
         let isWaitingToStart = false;
+
 
         // Results storage
         let results = JSON.parse(localStorage.getItem('results')) || [];
@@ -201,7 +281,7 @@
             updateResults();
 
             // Update the total count display
-            document.getElementById('resultCount').textContent = `Results: ${results.length}`;
+            document.getElementById('resultCount').textContent = `Count: ${results.length}`;
         }
 
         // Handle starting and stopping the timer
@@ -273,7 +353,7 @@
         document.getElementById('clearResults').addEventListener('click', () => {
             results = [];
             localStorage.clear();
-            document.getElementById('resultCount').textContent = 'Results: 0';
+            document.getElementById('resultCount').textContent = 'Count: 0';
             document.getElementById('averages').textContent = 
                 'Avg 5: --:--:-- | Best 5: --:--:-- | Avg 12: --:--:-- | Best 12: --:--:-- | Best All Time: --:--:--';
             document.getElementById('previousResult').textContent = 'Previous Result: None';
@@ -282,7 +362,7 @@
 
         // Initialize the page with saved results and averages
         updateResults();
-        document.getElementById('resultCount').textContent = `Results: ${results.length}`;
+        document.getElementById('resultCount').textContent = `Count: ${results.length}`;
         const previousResult = localStorage.getItem('previousResult') ? parseInt(localStorage.getItem('previousResult')) : null;
         document.getElementById('previousResult').textContent = `Previous Result: ${previousResult ? formatTime(previousResult) : 'None'}`;
     </script>
