@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rubik's Cube Timer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/timer.css">
+</head>
+<body>
+    <style>
+        
+    </style>
+
+    <!-- Previous result and time difference display -->
+    <div id="resultContainer" class="result-container">
+        <div id="previousResult"></div>
+        <div id="lastResult"></div>
+    </div>
+
+    <a href="results.html" id="viewResultsLink" class="result-link">View Results</a>
+
+    <!-- Stopwatch display -->
+    <div id="stopwatch" class="stopwatch">00:00:00</div>
+
+    <!-- Averages and best result display -->
+    <div id="averages" class="averages">
+        Avg 5: --:--:-- | Best 5: --:--:-- | Avg 12: --:--:-- | Best 12: --:--:-- | Best All Time: --:--:--
+    </div>
+
+    <!-- Button to clear saved results -->
+    <button id="clearResults" class="clear-button">Cast Results</button>
+
+    <!-- Total count of all results -->
+    <div id="resultCount" class="result-count">
+        Count: 0
+    </div>
+
+    <div class="auto-scramble-js auto-scramble"></div>
+
+    <script  src="/Timer-html/scripts/timer.js"></script>
+</body>
+</html>
